@@ -1,0 +1,352 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model availabilities {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String      @db.Uuid
+  day        day_of_week
+  start_time DateTime    @db.Time(6)
+  end_time   DateTime    @db.Time(6)
+  is_active  Boolean     @default(true)
+  created_at DateTime    @default(now()) @db.Timestamptz(6)
+  users      users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_availabilities_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model group_members {
+  id                                    String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  group_id                              String            @db.Uuid
+  user_id                               String            @db.Uuid
+  role                                  group_member_role @default(member)
+  joined_at                             DateTime          @default(now()) @db.Timestamptz(6)
+  invited_by                            String?           @db.Uuid
+  is_active                             Boolean           @default(true)
+  study_groups                          study_groups      @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_group_members_invited_byTousers users?            @relation("group_members_invited_byTousers", fields: [invited_by], references: [id], onUpdate: NoAction)
+  users_group_members_user_idTousers    users             @relation("group_members_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([group_id, user_id])
+  @@index([group_id], map: "idx_group_members_group_id")
+  @@index([user_id], map: "idx_group_members_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model group_messages {
+  id                   String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  group_id             String           @db.Uuid
+  sender_id            String           @db.Uuid
+  content              String
+  reply_to_id          String?          @db.Uuid
+  is_deleted           Boolean          @default(false)
+  created_at           DateTime         @default(now()) @db.Timestamptz(6)
+  edited_at            DateTime?        @db.Timestamptz(6)
+  study_groups         study_groups     @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  group_messages       group_messages?  @relation("group_messagesTogroup_messages", fields: [reply_to_id], references: [id], onUpdate: NoAction)
+  other_group_messages group_messages[] @relation("group_messagesTogroup_messages")
+  users                users            @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([group_id, created_at(sort: Desc)], map: "idx_messages_group_id")
+  @@index([sender_id], map: "idx_messages_sender_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model notifications {
+  id            String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String            @db.Uuid
+  type          notification_type
+  title         String            @db.VarChar(255)
+  body          String
+  data          Json?
+  is_read       Boolean           @default(false)
+  scheduled_for DateTime?         @db.Timestamptz(6)
+  sent_at       DateTime?         @db.Timestamptz(6)
+  created_at    DateTime          @default(now()) @db.Timestamptz(6)
+  users         users             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([scheduled_for], map: "idx_notif_scheduled", where: raw("(sent_at IS NULL)"))
+  @@index([type], map: "idx_notif_type")
+  @@index([user_id, is_read, created_at(sort: Desc)], map: "idx_notif_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model refresh_tokens {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String   @db.Uuid
+  token_hash String   @unique
+  expires_at DateTime @db.Timestamptz(6)
+  revoked    Boolean  @default(false)
+  ip_address String?  @db.Inet
+  user_agent String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([token_hash], map: "idx_refresh_tokens_token", where: raw("(revoked = false)"))
+  @@index([user_id], map: "idx_refresh_tokens_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model session_comments {
+  id             String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  session_id     String         @db.Uuid
+  author_id      String         @db.Uuid
+  content        String
+  is_deleted     Boolean        @default(false)
+  created_at     DateTime       @default(now()) @db.Timestamptz(6)
+  edited_at      DateTime?      @db.Timestamptz(6)
+  users          users          @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  study_sessions study_sessions @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([author_id], map: "idx_comments_author_id")
+  @@index([session_id], map: "idx_comments_session_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model session_participants {
+  id                  String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  session_id          String         @db.Uuid
+  user_id             String         @db.Uuid
+  joined_at           DateTime?      @db.Timestamptz(6)
+  left_at             DateTime?      @db.Timestamptz(6)
+  has_confirmed       Boolean        @default(false)
+  productivity_rating Int?           @db.SmallInt
+  notes               String?
+  study_sessions      study_sessions @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([session_id, user_id])
+  @@index([session_id], map: "idx_participants_session_id")
+  @@index([user_id], map: "idx_participants_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model study_groups {
+  id              String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_by      String           @db.Uuid
+  name            String           @db.VarChar(150)
+  description     String?
+  avatar_url      String?
+  color           String           @default("#1fc87a") @db.VarChar(7)
+  subject_id      String?          @db.Uuid
+  is_public       Boolean          @default(false)
+  max_members     Int              @default(20)
+  invitation_code String?          @unique @db.VarChar(12)
+  is_active       Boolean          @default(true)
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime         @default(now()) @db.Timestamptz(6)
+  group_members   group_members[]
+  group_messages  group_messages[]
+  users           users            @relation(fields: [created_by], references: [id], onUpdate: NoAction)
+  subjects        subjects?        @relation(fields: [subject_id], references: [id], onUpdate: NoAction)
+
+  @@index([created_by], map: "idx_groups_created_by")
+  @@index([invitation_code], map: "idx_groups_invite_code", where: raw("(invitation_code IS NOT NULL)"))
+  @@index([is_public], map: "idx_groups_is_public", where: raw("(is_public = true)"))
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model study_sessions {
+  id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id              String                 @db.Uuid
+  subject_id           String?                @db.Uuid
+  weekly_schedule_id   String?                @db.Uuid
+  title                String                 @db.VarChar(255)
+  description          String?
+  session_type         session_type           @default(solo)
+  status               session_status         @default(planned)
+  priority             priority_level         @default(medium)
+  location             String?                @db.VarChar(255)
+  is_online            Boolean                @default(false)
+  meeting_url          String?
+  planned_start        DateTime               @db.Timestamptz(6)
+  planned_end          DateTime               @db.Timestamptz(6)
+  actual_start         DateTime?              @db.Timestamptz(6)
+  actual_end           DateTime?              @db.Timestamptz(6)
+  planned_duration_min Int?                   @default(dbgenerated("(EXTRACT(epoch FROM (planned_end - planned_start)) / (60)::numeric)"))
+  actual_duration_min  Int?                   @default(dbgenerated("\nCASE\n    WHEN ((actual_start IS NOT NULL) AND (actual_end IS NOT NULL)) THEN (EXTRACT(epoch FROM (actual_end - actual_start)) / (60)::numeric)\n    ELSE NULL::numeric\nEND"))
+  notes                String?
+  productivity_rating  Int?                   @db.SmallInt
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime               @default(now()) @db.Timestamptz(6)
+  deleted_at           DateTime?              @db.Timestamptz(6)
+  session_comments     session_comments[]
+  session_participants session_participants[]
+  subjects             subjects?              @relation(fields: [subject_id], references: [id], onUpdate: NoAction)
+  users                users                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  weekly_schedules     weekly_schedules?      @relation(fields: [weekly_schedule_id], references: [id], onUpdate: NoAction)
+
+  @@index([user_id, planned_start, planned_end], map: "idx_sessions_overlap")
+  @@index([planned_start], map: "idx_sessions_planned_start")
+  @@index([weekly_schedule_id], map: "idx_sessions_schedule_id")
+  @@index([status], map: "idx_sessions_status")
+  @@index([subject_id], map: "idx_sessions_subject_id")
+  @@index([user_id], map: "idx_sessions_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model subject_goals {
+  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id        String   @db.Uuid
+  subject_id     String   @db.Uuid
+  week_start     DateTime @db.Date
+  target_hours   Decimal  @db.Decimal(5, 2)
+  achieved_hours Decimal  @default(0.00) @db.Decimal(5, 2)
+  is_completed   Boolean  @default(false)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
+  subjects       subjects @relation(fields: [subject_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users          users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, subject_id, week_start])
+  @@index([subject_id], map: "idx_subject_goals_subject_id")
+  @@index([user_id, week_start], map: "idx_subject_goals_user_week")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model subjects {
+  id             String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id        String           @db.Uuid
+  name           String           @db.VarChar(150)
+  description    String?
+  color          String           @default("#4f8ef7") @db.VarChar(7)
+  icon           String?          @db.VarChar(50)
+  priority       priority_level   @default(medium)
+  is_active      Boolean          @default(true)
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @default(now()) @db.Timestamptz(6)
+  study_groups   study_groups[]
+  study_sessions study_sessions[]
+  subject_goals  subject_goals[]
+  users          users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, name])
+  @@index([user_id], map: "idx_subjects_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id                                            String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                                         String                 @unique @db.VarChar(255)
+  password_hash                                 String
+  first_name                                    String                 @db.VarChar(100)
+  last_name                                     String                 @db.VarChar(100)
+  avatar_url                                    String?
+  role                                          user_role              @default(user)
+  status                                        user_status            @default(pending)
+  xp_points                                     Int                    @default(0)
+  level                                         Int                    @default(1)
+  streak_days                                   Int                    @default(0)
+  last_active_date                              DateTime?              @db.Date
+  weekly_goal_hours                             Decimal                @default(10.00) @db.Decimal(5, 2)
+  timezone                                      String                 @default("Africa/Casablanca") @db.VarChar(60)
+  email_verified                                Boolean                @default(false)
+  created_at                                    DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at                                    DateTime               @default(now()) @db.Timestamptz(6)
+  deleted_at                                    DateTime?              @db.Timestamptz(6)
+  availabilities                                availabilities[]
+  group_members_group_members_invited_byTousers group_members[]        @relation("group_members_invited_byTousers")
+  group_members_group_members_user_idTousers    group_members[]        @relation("group_members_user_idTousers")
+  group_messages                                group_messages[]
+  notifications                                 notifications[]
+  refresh_tokens                                refresh_tokens[]
+  session_comments                              session_comments[]
+  session_participants                          session_participants[]
+  study_groups                                  study_groups[]
+  study_sessions                                study_sessions[]
+  subject_goals                                 subject_goals[]
+  subjects                                      subjects[]
+  weekly_schedules                              weekly_schedules[]
+
+  @@index([deleted_at], map: "idx_users_deleted_at", where: raw("(deleted_at IS NULL)"))
+  @@index([email], map: "idx_users_email")
+  @@index([role], map: "idx_users_role")
+  @@index([status], map: "idx_users_status")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model weekly_schedules {
+  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id             String           @db.Uuid
+  week_start          DateTime         @db.Date
+  is_auto_generated   Boolean          @default(false)
+  generation_params   Json?
+  total_planned_hours Decimal          @default(0) @db.Decimal(6, 2)
+  created_at          DateTime         @default(now()) @db.Timestamptz(6)
+  study_sessions      study_sessions[]
+  users               users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, week_start])
+  @@index([user_id], map: "idx_weekly_schedules_user_id")
+}
+
+enum day_of_week {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+enum group_member_role {
+  owner
+  moderator
+  member
+}
+
+enum notification_type {
+  session_reminder
+  group_invitation
+  goal_achieved
+  session_comment
+  group_session_created
+  member_joined
+  session_cancelled
+  weekly_report
+}
+
+enum priority_level {
+  low
+  medium
+  high
+  critical
+}
+
+enum session_status {
+  planned
+  in_progress
+  completed
+  cancelled
+  missed
+}
+
+enum session_type {
+  solo
+  group
+}
+
+enum user_role {
+  admin
+  user
+}
+
+enum user_status {
+  active
+  inactive
+  banned
+  pending
+}
