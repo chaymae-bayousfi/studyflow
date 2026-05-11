@@ -1,4 +1,56 @@
-import { Controller } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+} from '@nestjs/common';
 
+import { AuthService } from './auth.service';
+
+import { RegisterDto } from './dto/register.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { LoginDto } from './dto/login.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+@ApiBearerAuth()
 @Controller('auth')
-export class AuthController {}
+export class AuthController {
+  constructor(
+    private authService: AuthService,
+  ) {}
+
+  @Post('register')
+  register(
+    @Body() registerDto: RegisterDto,
+  ) {
+    return this.authService.register(
+      registerDto,
+    );
+  }
+  @Post('login')
+    login(@Body() loginDto: LoginDto) {
+    return this.authService.login(
+        loginDto.email,
+        loginDto.password,
+    );
+    }
+
+    @Post('refresh')
+    refresh(
+      @Body()
+      dto: RefreshTokenDto,
+    ) {
+      return this.authService.refresh(
+        dto.refresh_token,
+      );
+    }
+
+
+    @Post('logout')
+    logout(
+      @Body()
+      dto: RefreshTokenDto,
+    ) {
+      return this.authService.logout(
+        dto.refresh_token,
+      );
+    }
+}
