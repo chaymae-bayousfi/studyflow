@@ -26,12 +26,13 @@ export class StudyflowService {
   constructor(private http: HttpClient) {}
 
   bootstrap(): Observable<StudyUser> {
+    const savedId = localStorage.getItem(this.currentUserKey);
+    if (savedId) {
+      return this.http.get<StudyUser>(`${this.apiUrl}/users/${savedId}`).pipe(timeout(8000));
+    }
     return this.http.get<StudyUser[]>(`${this.apiUrl}/users`).pipe(
       timeout(8000),
-      map((users) => {
-        const savedId = localStorage.getItem(this.currentUserKey);
-        return users.find((user) => user.id === savedId) || users.find((user) => user.status === 'active') || users[0];
-      }),
+      map((users) => users[0]),
       tap((user) => {
         if (user) {
           localStorage.setItem(this.currentUserKey, user.id);

@@ -1,0 +1,57 @@
+<div class="login-page">
+  <div class="login-glow"></div>
+
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="logo-text">StudyFlow</span>
+    </div>
+
+    <div class="login-title">Connexion</div>
+    <div class="login-sub">Entrez vos identifiants pour accéder à votre espace.</div>
+
+    <div *ngIf="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
+
+    <form class="form" (ngSubmit)="login()">
+      <label>
+        Adresse email
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="email@etudiant.ma"
+          required
+          autocomplete="email"
+        />
+      </label>
+
+      <label>
+        Mot de passe
+        <div class="password-wrapper">
+          <input
+            [type]="showPw ? 'text' : 'password'"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Votre mot de passe"
+            required
+            autocomplete="current-password"
+          />
+          <button type="button" class="toggle-pw" (click)="showPw = !showPw">
+            <svg *ngIf="!showPw" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg *ngIf="showPw" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+      </label>
+
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ loading ? 'Connexion en cours...' : 'Se connecter' }}
+      </button>
+    </form>
+
+    <div class="login-footer">
+      Pas encore de compte ? <a routerLink="/login">Créer un compte</a>
+    </div>
+  </div>
+</div>

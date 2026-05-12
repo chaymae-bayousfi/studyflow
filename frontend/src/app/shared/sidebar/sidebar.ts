@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { StudyUser } from '../../models/user.model';
+import { AuthService } from '../../services/auth';
 import { StudyflowService } from '../../services/studyflow';
 
 @Component({
@@ -15,7 +16,11 @@ export class SidebarComponent implements OnInit {
   currentUser: StudyUser | null = null;
   unreadCount = 0;
 
-  constructor(private studyflow: StudyflowService) {}
+  constructor(
+    private studyflow: StudyflowService,
+    private auth: AuthService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.studyflow.bootstrap().subscribe({
@@ -49,5 +54,13 @@ export class SidebarComponent implements OnInit {
   initials(): string {
     if (!this.currentUser) return 'SF';
     return `${this.currentUser.first_name[0] || ''}${this.currentUser.last_name[0] || ''}`.toUpperCase();
+  }
+
+  logout(): void {
+    this.auth.logout().subscribe({
+      complete: () => {
+        this.router.navigate(['/login']);
+      },
+    });
   }
 }

@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 
+import { authGuard } from './guards/auth-guard';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout';
+import { LoginPageComponent } from './pages/login-page/login-page';
 import { DashboardPageComponent } from './pages/dashboard-page/dashboard-page';
 import { PlanningPageComponent } from './pages/planning-page/planning-page';
 import { ProductivityPageComponent } from './pages/productivity-page/productivity-page';
@@ -15,8 +17,13 @@ import { UserDetailsComponent } from './pages/user-details/user-details';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    component: LoginPageComponent,
+  },
+  {
     path: '',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', component: DashboardPageComponent },
       { path: 'planning', component: PlanningPageComponent },
