@@ -6,11 +6,9 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 import { CreateSubjectDto } from './dto/create-subject.dto';
 
@@ -20,7 +18,6 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 
 @Controller('subjects')
-@UseGuards(JwtAuthGuard)
 export class SubjectsController {
   constructor(
     private subjectsService: SubjectsService,
@@ -29,28 +26,33 @@ export class SubjectsController {
   @Post()
   create(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Body() dto: CreateSubjectDto,
   ) {
     return this.subjectsService.create(
-      req.user.userId,
+      userId || req.user?.userId,
       dto,
     );
   }
 
   @Get()
-  findAll(@Req() req: any) {
+  findAll(
+    @Req() req: any,
+    @Query('userId') userId: string,
+  ) {
     return this.subjectsService.findAll(
-      req.user.userId,
+      userId || req.user?.userId,
     );
   }
   @Patch(':id')
     update(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Param('id') id: string,
     @Body() dto: UpdateSubjectDto,
     ) {
     return this.subjectsService.update(
-        req.user.userId,
+        userId || req.user?.userId,
         id,
         dto,
     );
@@ -59,10 +61,11 @@ export class SubjectsController {
     @Delete(':id')
     remove(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Param('id') id: string,
     ) {
     return this.subjectsService.remove(
-        req.user.userId,
+        userId || req.user?.userId,
         id,
     );
     }

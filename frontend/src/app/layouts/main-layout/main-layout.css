@@ -1,0 +1,15 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  background: #0b0e17;
+  color: #eceef5;
+}
+
+.workspace {
+  min-width: 0;
+  flex: 1;
+}
+
+.content {
+  padding: 22px;
+}

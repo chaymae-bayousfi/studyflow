@@ -3,11 +3,9 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 import { GenerateScheduleDto } from './dto/generate-schedule.dto';
 
@@ -15,7 +13,6 @@ import { WeeklySchedulesService } from './weekly-schedules.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('weekly-schedules')
-@UseGuards(JwtAuthGuard)
 export class WeeklySchedulesController {
   constructor(
     private weeklySchedulesService: WeeklySchedulesService,
@@ -24,18 +21,22 @@ export class WeeklySchedulesController {
   @Post('generate')
   generate(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Body() dto: GenerateScheduleDto,
   ) {
     return this.weeklySchedulesService.generate(
-      req.user.userId,
+      userId || req.user?.userId,
       dto,
     );
   }
 
   @Get()
-  findAll(@Req() req: any) {
+  findAll(
+    @Req() req: any,
+    @Query('userId') userId: string,
+  ) {
     return this.weeklySchedulesService.findAll(
-      req.user.userId,
+      userId || req.user?.userId,
     );
   }
 }

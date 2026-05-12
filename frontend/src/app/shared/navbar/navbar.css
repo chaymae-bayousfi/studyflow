@@ -1,0 +1,37 @@
+.topbar {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: #10141f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.eyebrow {
+  color: #4f8ef7;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 2px 0 0;
+  font-size: 1.05rem;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7e8799;
+  font-size: 0.82rem;
+}
+
+.status span {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: #1fc87a;
+}

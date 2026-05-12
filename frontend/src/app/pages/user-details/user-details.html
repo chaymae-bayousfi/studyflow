@@ -1,0 +1,85 @@
+<section class="details-page">
+  <a
+    routerLink="/users"
+    class="back-link"
+  >
+    ← Retour aux users
+  </a>
+
+  <div
+    *ngIf="isLoading"
+    class="panel"
+  >
+    Chargement...
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    class="alert"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <article
+    *ngIf="user"
+    class="profile-panel"
+  >
+    <div class="hero">
+      <img
+        *ngIf="user.avatar_url"
+        [src]="user.avatar_url"
+        [alt]="user.first_name"
+      />
+      <span
+        *ngIf="!user.avatar_url"
+        class="avatar-fallback"
+      >
+        {{ initials(user) }}
+      </span>
+
+      <div>
+        <span class="eyebrow">Profil étudiant</span>
+        <h1>{{ user.first_name }} {{ user.last_name }}</h1>
+        <p>{{ user.email }}</p>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div>
+        <span>Status</span>
+        <strong>{{ user.status }}</strong>
+      </div>
+      <div>
+        <span>Niveau</span>
+        <strong>{{ user.level }}</strong>
+      </div>
+      <div>
+        <span>XP</span>
+        <strong>{{ user.xp_points }}</strong>
+      </div>
+      <div>
+        <span>Streak</span>
+        <strong>{{ user.streak_days }} jours</strong>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div>
+        <span>Objectif hebdomadaire</span>
+        <strong>{{ user.weekly_goal_hours }}h</strong>
+      </div>
+      <div>
+        <span>Timezone</span>
+        <strong>{{ user.timezone }}</strong>
+      </div>
+      <div>
+        <span>Email vérifié</span>
+        <strong>{{ user.email_verified ? 'Oui' : 'Non' }}</strong>
+      </div>
+      <div>
+        <span>Créé le</span>
+        <strong>{{ user.created_at | date:'medium' }}</strong>
+      </div>
+    </div>
+  </article>
+</section>

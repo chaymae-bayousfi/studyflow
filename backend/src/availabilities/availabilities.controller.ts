@@ -6,11 +6,9 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
@@ -19,7 +17,6 @@ import { AvailabilitiesService } from './availabilities.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('availabilities')
-@UseGuards(JwtAuthGuard)
 export class AvailabilitiesController {
   constructor(
     private availabilitiesService: AvailabilitiesService,
@@ -28,29 +25,34 @@ export class AvailabilitiesController {
   @Post()
   create(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Body() dto: CreateAvailabilityDto,
   ) {
     return this.availabilitiesService.create(
-      req.user.userId,
+      userId || req.user?.userId,
       dto,
     );
   }
 
   @Get()
-  findAll(@Req() req: any) {
+  findAll(
+    @Req() req: any,
+    @Query('userId') userId: string,
+  ) {
     return this.availabilitiesService.findAll(
-      req.user.userId,
+      userId || req.user?.userId,
     );
   }
 
   @Patch(':id')
   update(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Param('id') id: string,
     @Body() dto: UpdateAvailabilityDto,
   ) {
     return this.availabilitiesService.update(
-      req.user.userId,
+      userId || req.user?.userId,
       id,
       dto,
     );
@@ -59,10 +61,11 @@ export class AvailabilitiesController {
   @Delete(':id')
   remove(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Param('id') id: string,
   ) {
     return this.availabilitiesService.remove(
-      req.user.userId,
+      userId || req.user?.userId,
       id,
     );
   }

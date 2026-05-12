@@ -1,0 +1,79 @@
+<aside class="sidebar">
+  <div class="brand">
+    <span class="brand-mark">S</span>
+    <span>StudyFlow</span>
+  </div>
+
+  <div class="profile-card">
+    <div class="avatar">SF</div>
+    <div>
+      <strong>Espace étudiant</strong>
+      <small>Gestion utilisateurs</small>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <span class="nav-label">Étude</span>
+
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <span>⌂</span>
+      Dashboard
+    </a>
+
+    <a routerLink="/planning" routerLinkActive="active">
+      <span>▦</span>
+      Mon planning
+    </a>
+
+    <a routerLink="/productivity" routerLinkActive="active">
+      <span>▥</span>
+      Ma productivité
+    </a>
+
+    <a routerLink="/goals" routerLinkActive="active">
+      <span>◎</span>
+      Mes objectifs
+    </a>
+
+    <span class="nav-label">Collaboration</span>
+
+    <a routerLink="/groups" routerLinkActive="active">
+      <span>◌</span>
+      Groupes d'étude
+    </a>
+
+    <a routerLink="/messages" routerLinkActive="active">
+      <span>✉</span>
+      Messages
+    </a>
+
+    <a routerLink="/notifications" routerLinkActive="active">
+      <span>!</span>
+      Notifications
+    </a>
+
+    <span class="nav-label">Compte</span>
+
+    <a
+      routerLink="/users"
+      routerLinkActive="active"
+    >
+      <span>◉</span>
+      Users
+    </a>
+
+    <a routerLink="/profile" routerLinkActive="active">
+      <span>◍</span>
+      Mon profil
+    </a>
+
+    <a routerLink="/settings" routerLinkActive="active">
+      <span>⚙</span>
+      Paramètres
+    </a>
+  </nav>
+</aside>

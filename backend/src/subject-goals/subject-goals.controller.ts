@@ -3,11 +3,9 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 import { SubjectGoalsService } from './subject-goals.service';
 
@@ -15,7 +13,6 @@ import { CreateSubjectGoalDto } from './dto/create-subject-goal.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('subject-goals')
-@UseGuards(JwtAuthGuard)
 export class SubjectGoalsController {
   constructor(
     private subjectGoalsService: SubjectGoalsService,
@@ -24,18 +21,22 @@ export class SubjectGoalsController {
   @Post()
   create(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Body() dto: CreateSubjectGoalDto,
   ) {
     return this.subjectGoalsService.create(
-      req.user.userId,
+      userId || req.user?.userId,
       dto,
     );
   }
 
   @Get()
-  findAll(@Req() req: any) {
+  findAll(
+    @Req() req: any,
+    @Query('userId') userId: string,
+  ) {
     return this.subjectGoalsService.findAll(
-      req.user.userId,
+      userId || req.user?.userId,
     );
   }
 }

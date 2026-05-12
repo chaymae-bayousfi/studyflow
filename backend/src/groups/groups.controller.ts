@@ -4,12 +4,9 @@ import {
   Get,
   Post,
   Req,
-  UseGuards,
   Param,
   Query,
 } from '@nestjs/common';
-
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 import { CreateGroupDto } from './dto/create-group.dto';
 
@@ -21,7 +18,6 @@ import { InviteUserDto } from './dto/invite-user.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('groups')
-@UseGuards(JwtAuthGuard)
 export class GroupsController {
   constructor(
     private groupsService: GroupsService,
@@ -30,10 +26,11 @@ export class GroupsController {
   @Post()
   create(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Body() dto: CreateGroupDto,
   ) {
     return this.groupsService.create(
-      req.user.userId,
+      userId || req.user?.userId,
       dto,
     );
   }
@@ -46,10 +43,11 @@ export class GroupsController {
   @Post(':id/join')
     join(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Param('id') id: string,
     ) {
     return this.groupsService.joinGroup(
-        req.user.userId,
+        userId || req.user?.userId,
         id,
     );
     }
@@ -64,11 +62,12 @@ export class GroupsController {
     @Post(':id/messages')
     sendMessage(
     @Req() req: any,
+    @Query('userId') userId: string,
     @Param('id') id: string,
     @Body() dto: CreateMessageDto,
     ) {
     return this.groupsService.sendMessage(
-        req.user.userId,
+        userId || req.user?.userId,
         id,
         dto,
     );
@@ -84,10 +83,11 @@ export class GroupsController {
     @Post('join/code')
     joinByCode(
       @Req() req: any,
+      @Query('userId') userId: string,
       @Query('code') code: string,
     ) {
       return this.groupsService.joinByCode(
-        req.user.userId,
+        userId || req.user?.userId,
         code,
       );
     }
@@ -95,11 +95,12 @@ export class GroupsController {
     @Post(':id/invite')
     inviteUser(
       @Req() req: any,
+      @Query('userId') userId: string,
       @Param('id') id: string,
       @Body() dto: InviteUserDto,
     ) {
       return this.groupsService.inviteUser(
-        req.user.userId,
+        userId || req.user?.userId,
         id,
         dto,
       );

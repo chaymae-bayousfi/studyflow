@@ -1,0 +1,296 @@
+<section class="study-page">
+  <div class="hero">
+    <div>
+      <span class="eyebrow">Espace étudiant</span>
+      <h1>
+        {{ section === 'dashboard' ? 'Tableau de bord' : section }}
+      </h1>
+      <p>
+        Planification intelligente, objectifs, collaboration, productivité et notifications connectés à NestJS + PostgreSQL.
+      </p>
+    </div>
+
+    <div class="user-switcher" *ngIf="currentUser">
+      <span class="avatar">{{ initials() }}</span>
+      <select [ngModel]="currentUser.id" (ngModelChange)="switchUser($event)">
+        <option *ngFor="let user of users" [value]="user.id">
+          {{ user.first_name }} {{ user.last_name }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="loading" *ngIf="loading">Chargement StudyFlow...</div>
+
+  <ng-container *ngIf="!loading">
+    <div class="kpis">
+      <article>
+        <span>Temps étudié</span>
+        <strong>{{ analytics.totalStudyHours }}h</strong>
+      </article>
+      <article>
+        <span>Sessions réalisées</span>
+        <strong>{{ completedCount }}/{{ sessions.length }}</strong>
+      </article>
+      <article>
+        <span>Objectifs</span>
+        <strong>{{ goals.length }}</strong>
+      </article>
+      <article>
+        <span>Notifications</span>
+        <strong>{{ unreadCount }}</strong>
+      </article>
+    </div>
+
+    <div class="grid two" *ngIf="section === 'dashboard'">
+      <article class="panel">
+        <h2>Planning à venir</h2>
+        <div class="timeline">
+          <div class="timeline-item" *ngFor="let session of sessions.slice(0, 6)">
+            <span [style.background]="session.subjects?.color || '#4f8ef7'"></span>
+            <div>
+              <strong>{{ session.title }}</strong>
+              <small>{{ formatDateTime(session.planned_start) }} · {{ session.status }}</small>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Productivité hebdomadaire</h2>
+        <div class="bar-chart">
+          <div *ngFor="let point of weekly">
+            <span>{{ point.day }}</span>
+            <i [style.height.%]="(point.hours / maxWeeklyHours) * 100"></i>
+            <b>{{ point.hours }}h</b>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="grid two" *ngIf="section === 'planning'">
+      <article class="panel">
+        <h2>Matières / projets</h2>
+        <form class="form" (ngSubmit)="createSubject()">
+          <input placeholder="Nom de la matière" name="subjectName" [(ngModel)]="subjectForm.name" required />
+          <input placeholder="Description" name="subjectDescription" [(ngModel)]="subjectForm.description" />
+          <div class="inline">
+            <input type="color" name="subjectColor" [(ngModel)]="subjectForm.color" />
+            <select name="subjectPriority" [(ngModel)]="subjectForm.priority">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+          <button>Ajouter matière</button>
+        </form>
+        <div class="chips">
+          <button *ngFor="let subject of subjects" (click)="deleteSubject(subject.id)" [style.borderColor]="subject.color">
+            {{ subject.name }} · {{ subject.priority }}
+          </button>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Disponibilités</h2>
+        <form class="form" (ngSubmit)="createAvailability()">
+          <select name="day" [(ngModel)]="availabilityForm.day">
+            <option value="monday">Lundi</option>
+            <option value="tuesday">Mardi</option>
+            <option value="wednesday">Mercredi</option>
+            <option value="thursday">Jeudi</option>
+            <option value="friday">Vendredi</option>
+            <option value="saturday">Samedi</option>
+            <option value="sunday">Dimanche</option>
+          </select>
+          <div class="inline">
+            <input type="time" name="start" [(ngModel)]="availabilityForm.start_time" />
+            <input type="time" name="end" [(ngModel)]="availabilityForm.end_time" />
+          </div>
+          <button>Ajouter disponibilité</button>
+        </form>
+        <div class="list">
+          <div *ngFor="let availability of availabilities">
+            <strong>{{ availability.day }}</strong>
+            <span>{{ availability.start_time | date:'HH:mm' }} - {{ availability.end_time | date:'HH:mm' }}</span>
+            <button (click)="deleteAvailability(availability.id)">Supprimer</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel wide">
+        <div class="section-head">
+          <h2>Sessions et génération intelligente</h2>
+          <button (click)="generatePlanning()">Générer planning</button>
+        </div>
+        <form class="form session-form" (ngSubmit)="createSession()">
+          <input placeholder="Titre session" name="sessionTitle" [(ngModel)]="sessionForm.title" required />
+          <select name="sessionSubject" [(ngModel)]="sessionForm.subject_id" required>
+            <option value="">Matière</option>
+            <option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.name }}</option>
+          </select>
+          <input type="datetime-local" name="sessionStart" [(ngModel)]="sessionForm.planned_start" required />
+          <input type="datetime-local" name="sessionEnd" [(ngModel)]="sessionForm.planned_end" required />
+          <select name="sessionPriority" [(ngModel)]="sessionForm.priority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+          <button>Créer session</button>
+        </form>
+        <div class="sessions">
+          <div class="session" *ngFor="let session of sessions">
+            <span [style.background]="session.subjects?.color || '#4f8ef7'"></span>
+            <div>
+              <strong>{{ session.title }}</strong>
+              <small>{{ formatDateTime(session.planned_start) }} · {{ session.priority }} · {{ session.status }}</small>
+            </div>
+            <button (click)="completeSession(session)">Réalisée</button>
+            <button class="danger" (click)="deleteSession(session.id)">Delete</button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="grid two" *ngIf="section === 'productivity'">
+      <article class="panel">
+        <h2>Prévu vs réalisé</h2>
+        <div class="donut">
+          <strong>{{ completedCount }}</strong>
+          <span>réalisées sur {{ sessions.length }}</span>
+        </div>
+      </article>
+      <article class="panel">
+        <h2>Progression par matière</h2>
+        <div class="subject-bars">
+          <div *ngFor="let stat of subjectStats">
+            <span>{{ stat.subject }}</span>
+            <i><b [style.width.%]="stat.hours * 12"></b></i>
+            <strong>{{ stat.hours }}h</strong>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="grid two" *ngIf="section === 'goals'">
+      <article class="panel">
+        <h2>Nouvel objectif</h2>
+        <form class="form" (ngSubmit)="createGoal()">
+          <select name="goalSubject" [(ngModel)]="goalForm.subject_id" required>
+            <option value="">Matière</option>
+            <option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.name }}</option>
+          </select>
+          <input type="date" name="weekStart" [(ngModel)]="goalForm.week_start" />
+          <input type="number" min="1" name="targetHours" [(ngModel)]="goalForm.target_hours" />
+          <button>Créer objectif</button>
+        </form>
+      </article>
+      <article class="panel">
+        <h2>Mes objectifs</h2>
+        <div class="goal" *ngFor="let goal of goals">
+          <strong>{{ goal.subjects.name }}</strong>
+          <span>{{ goal.achieved_hours }}h / {{ goal.target_hours }}h</span>
+          <i><b [style.width.%]="progress(goal)"></b></i>
+        </div>
+      </article>
+    </div>
+
+    <div class="grid two" *ngIf="section === 'groups'">
+      <article class="panel">
+        <h2>Créer groupe d’étude</h2>
+        <form class="form" (ngSubmit)="createGroup()">
+          <input placeholder="Nom du groupe" name="groupName" [(ngModel)]="groupForm.name" required />
+          <input placeholder="Description" name="groupDescription" [(ngModel)]="groupForm.description" />
+          <select name="groupSubject" [(ngModel)]="groupForm.subject_id">
+            <option value="">Sans matière</option>
+            <option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.name }}</option>
+          </select>
+          <label class="check"><input type="checkbox" name="isPublic" [(ngModel)]="groupForm.is_public" /> Public</label>
+          <button>Créer groupe</button>
+        </form>
+      </article>
+      <article class="panel">
+        <h2>Groupes disponibles</h2>
+        <div class="group-card" *ngFor="let group of groups">
+          <strong>{{ group.name }}</strong>
+          <small>{{ group.description || 'Groupe StudyFlow' }}</small>
+          <span>Code: {{ group.invitation_code || '-' }}</span>
+          <button (click)="joinGroup(group.id)">Rejoindre</button>
+        </div>
+      </article>
+    </div>
+
+    <div class="grid two" *ngIf="section === 'messages'">
+      <article class="panel">
+        <h2>Conversation groupe</h2>
+        <select [(ngModel)]="selectedGroupId" (ngModelChange)="loadMessages()">
+          <option value="">Choisir un groupe</option>
+          <option *ngFor="let group of groups" [value]="group.id">{{ group.name }}</option>
+        </select>
+        <div class="chat">
+          <div *ngFor="let message of messages">
+            <strong>{{ message.users.first_name }} {{ message.users.last_name }}</strong>
+            <p>{{ message.content }}</p>
+          </div>
+        </div>
+        <form class="message-box" (ngSubmit)="sendMessage()">
+          <input placeholder="Votre message" name="messageText" [(ngModel)]="messageText" />
+          <button>Envoyer</button>
+        </form>
+      </article>
+      <article class="panel">
+        <h2>Inviter un étudiant</h2>
+        <form class="form" (ngSubmit)="inviteUser()">
+          <input type="email" placeholder="email@etudiant.ma" name="inviteEmail" [(ngModel)]="inviteEmail" />
+          <button>Inviter au groupe sélectionné</button>
+        </form>
+      </article>
+    </div>
+
+    <div class="panel" *ngIf="section === 'notifications'">
+      <h2>Notifications</h2>
+      <div class="notification" *ngFor="let notification of notifications" [class.unread]="!notification.is_read">
+        <div>
+          <strong>{{ notification.title }}</strong>
+          <p>{{ notification.body }}</p>
+        </div>
+        <button (click)="markRead(notification)" [disabled]="notification.is_read">Lu</button>
+      </div>
+    </div>
+
+    <div class="grid two" *ngIf="section === 'profile' || section === 'settings'">
+      <article class="panel profile-card">
+        <span class="avatar large">{{ initials() }}</span>
+        <h2>{{ currentUser?.first_name }} {{ currentUser?.last_name }}</h2>
+        <p>{{ currentUser?.email }}</p>
+        <div class="profile-metrics">
+          <span>Niveau {{ currentUser?.level }}</span>
+          <span>{{ currentUser?.xp_points }} XP</span>
+          <span>{{ currentUser?.streak_days }} jours</span>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>{{ section === 'profile' ? 'Mon profil' : 'Paramètres & rappels' }}</h2>
+        <form class="form" *ngIf="section === 'profile'" (ngSubmit)="saveProfile()">
+          <input name="firstName" [(ngModel)]="profileForm.first_name" />
+          <input name="lastName" [(ngModel)]="profileForm.last_name" />
+          <input type="email" name="email" [(ngModel)]="profileForm.email" />
+          <input type="number" name="weeklyGoal" [(ngModel)]="profileForm.weekly_goal_hours" />
+          <button>Enregistrer profil</button>
+        </form>
+
+        <form class="form" *ngIf="section === 'settings'" (ngSubmit)="createReminder()">
+          <input name="reminderTitle" [(ngModel)]="settingsForm.reminderTitle" />
+          <textarea name="reminderBody" [(ngModel)]="settingsForm.reminderBody"></textarea>
+          <button>Créer notification test</button>
+        </form>
+      </article>
+    </div>
+  </ng-container>
+</section>

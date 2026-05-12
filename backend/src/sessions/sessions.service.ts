@@ -252,6 +252,11 @@ export class SessionsService {
       status: dto.status as any,
     }),
 
+    ...(dto.productivity_rating && {
+      productivity_rating:
+        dto.productivity_rating,
+    }),
+
     ...(dto.is_online !== undefined && {
       is_online: dto.is_online,
     }),

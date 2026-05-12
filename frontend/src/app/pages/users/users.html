@@ -1,0 +1,299 @@
+<section class="users-page">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Gestion users</span>
+      <h1>Utilisateurs StudyFlow</h1>
+      <p>
+        Créer, modifier, consulter et supprimer les comptes étudiants reliés à PostgreSQL via NestJS.
+      </p>
+    </div>
+
+    <button
+      class="ghost-button"
+      type="button"
+      (click)="loadUsers()"
+    >
+      Actualiser
+    </button>
+  </div>
+
+  <div class="stats-grid">
+    <article>
+      <span>Total users</span>
+      <strong>{{ users.length }}</strong>
+    </article>
+    <article>
+      <span>Actifs</span>
+      <strong>{{ activeCount }}</strong>
+    </article>
+    <article>
+      <span>Niveau moyen</span>
+      <strong>{{ averageLevel }}</strong>
+    </article>
+    <article>
+      <span>XP total</span>
+      <strong>{{ totalXp }}</strong>
+    </article>
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    class="alert error"
+  >
+    {{ errorMessage }}
+  </div>
+  <div
+    *ngIf="successMessage"
+    class="alert success"
+  >
+    {{ successMessage }}
+  </div>
+
+  <div class="content-grid">
+    <form
+      class="user-form"
+      (ngSubmit)="saveUser()"
+    >
+      <div class="form-title">
+        <div>
+          <span>{{ selectedUser ? 'Modification' : 'Nouveau user' }}</span>
+          <h2>{{ selectedUser ? selectedUser.first_name + ' ' + selectedUser.last_name : 'Ajouter un étudiant' }}</h2>
+        </div>
+        <button
+          *ngIf="selectedUser"
+          class="icon-button"
+          type="button"
+          (click)="resetForm()"
+          title="Annuler"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="field-row">
+        <label>
+          Prénom
+          <input
+            name="first_name"
+            [(ngModel)]="form.first_name"
+            required
+          />
+        </label>
+        <label>
+          Nom
+          <input
+            name="last_name"
+            [(ngModel)]="form.last_name"
+            required
+          />
+        </label>
+      </div>
+
+      <label>
+        Email
+        <input
+          name="email"
+          type="email"
+          [(ngModel)]="form.email"
+          required
+        />
+      </label>
+
+      <label>
+        Mot de passe
+        <input
+          name="password"
+          type="password"
+          [(ngModel)]="form.password"
+          [required]="!selectedUser"
+          minlength="6"
+          placeholder="{{ selectedUser ? 'Laisser vide pour garder l’actuel' : 'Minimum 6 caractères' }}"
+        />
+      </label>
+
+      <div class="field-row">
+        <label>
+          Status
+          <select
+            name="status"
+            [(ngModel)]="form.status"
+          >
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="inactive">Inactive</option>
+            <option value="banned">Banned</option>
+          </select>
+        </label>
+        <label>
+          Objectif hebdo
+          <input
+            name="weekly_goal_hours"
+            type="number"
+            min="0"
+            [(ngModel)]="form.weekly_goal_hours"
+          />
+        </label>
+      </div>
+
+      <div class="field-row three">
+        <label>
+          XP
+          <input
+            name="xp_points"
+            type="number"
+            min="0"
+            [(ngModel)]="form.xp_points"
+          />
+        </label>
+        <label>
+          Niveau
+          <input
+            name="level"
+            type="number"
+            min="1"
+            [(ngModel)]="form.level"
+          />
+        </label>
+        <label>
+          Streak
+          <input
+            name="streak_days"
+            type="number"
+            min="0"
+            [(ngModel)]="form.streak_days"
+          />
+        </label>
+      </div>
+
+      <label>
+        Avatar URL
+        <input
+          name="avatar_url"
+          [(ngModel)]="form.avatar_url"
+          placeholder="Optionnel"
+        />
+      </label>
+
+      <button
+        class="primary-button"
+        type="submit"
+        [disabled]="isSaving"
+      >
+        {{ isSaving ? 'Enregistrement...' : selectedUser ? 'Modifier user' : 'Créer user' }}
+      </button>
+    </form>
+
+    <section class="users-panel">
+      <div class="toolbar">
+        <input
+          type="search"
+          placeholder="Rechercher par nom ou email"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="applyFilters()"
+        />
+
+        <select
+          [(ngModel)]="statusFilter"
+          (ngModelChange)="applyFilters()"
+        >
+          <option value="all">Tous les status</option>
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="inactive">Inactive</option>
+          <option value="banned">Banned</option>
+        </select>
+      </div>
+
+      <div
+        *ngIf="isLoading"
+        class="empty-state"
+      >
+        Chargement des users...
+      </div>
+
+      <div
+        *ngIf="!isLoading && !filteredUsers.length"
+        class="empty-state"
+      >
+        Aucun utilisateur trouvé.
+      </div>
+
+      <div
+        *ngIf="!isLoading && filteredUsers.length"
+        class="table-wrap"
+      >
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Status</th>
+              <th>Progression</th>
+              <th>Objectif</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of filteredUsers">
+              <td>
+                <div class="user-cell">
+                  <img
+                    *ngIf="user.avatar_url"
+                    [src]="user.avatar_url"
+                    [alt]="user.first_name"
+                  />
+                  <span
+                    *ngIf="!user.avatar_url"
+                    class="avatar-fallback"
+                  >
+                    {{ initials(user) }}
+                  </span>
+                  <div>
+                    <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                    <small>{{ user.email }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill" [ngClass]="user.status">
+                  {{ user.status }}
+                </span>
+              </td>
+              <td>
+                <div class="progress-text">
+                  Niveau {{ user.level }} · {{ user.xp_points }} XP
+                </div>
+                <div class="mini-track">
+                  <span [style.width.%]="user.xp_points % 100"></span>
+                </div>
+              </td>
+              <td>{{ user.weekly_goal_hours }}h / semaine</td>
+              <td>
+                <div class="actions">
+                  <a
+                    [routerLink]="['/users', user.id]"
+                    title="Voir détails"
+                  >
+                    Voir
+                  </a>
+                  <button
+                    type="button"
+                    (click)="editUser(user)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="danger"
+                    (click)="deleteUser(user)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</section>
