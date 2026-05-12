@@ -105,4 +105,9 @@ export class GroupsController {
         dto,
       );
     }
+
+    @Get(':id/sessions')
+    groupSessions(@Param('id') id: string) {
+      return this.groupsService.getGroupSessions(id);
+    }
 }

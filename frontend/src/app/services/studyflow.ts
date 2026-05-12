@@ -141,6 +141,10 @@ export class StudyflowService {
     return this.http.post<GroupMessage>(`${this.apiUrl}/groups/${groupId}/messages`, { content }, { params: this.userParams(userId) }).pipe(timeout(8000));
   }
 
+  groupSessions(groupId: string): Observable<StudySession[]> {
+    return this.http.get<StudySession[]>(`${this.apiUrl}/groups/${groupId}/sessions`).pipe(timeout(8000));
+  }
+
   notifications(userId: string): Observable<NotificationItem[]> {
     return this.http.get<NotificationItem[]>(`${this.apiUrl}/notifications`, { params: this.userParams(userId) }).pipe(timeout(8000));
   }

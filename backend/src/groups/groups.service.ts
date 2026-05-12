@@ -335,4 +335,18 @@ export class GroupsService {
 
       return createdMember;
     }
+
+    async getGroupSessions(groupId: string) {
+      return this.prisma.study_sessions.findMany({
+        where: {
+          group_id: groupId,
+        },
+        include: {
+          subjects: true,
+        },
+        orderBy: {
+          planned_start: 'desc',
+        },
+      });
+    }
 }
