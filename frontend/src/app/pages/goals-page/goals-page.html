@@ -1,0 +1,77 @@
+<div class="page">
+  <div>
+    <span class="eyebrow">Objectifs</span>
+    <h1>Mes objectifs</h1>
+    <p class="sub">Définissez et suivez vos objectifs d'étude hebdomadaires par matière.</p>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+
+  <div class="grid-2">
+    <!-- CREATE GOAL FORM -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Nouvel objectif</div>
+          <div class="card-sub">Semaine courante</div>
+        </div>
+      </div>
+      <form class="form" (ngSubmit)="createGoal()">
+        <label>
+          Matière
+          <select [(ngModel)]="goalForm.subject_id" name="gsubject" required>
+            <option value="">Choisir une matière</option>
+            <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </label>
+        <label>
+          Début de semaine
+          <input type="date" [(ngModel)]="goalForm.week_start" name="gweek" required />
+        </label>
+        <label>
+          Heures cibles
+          <input type="number" [(ngModel)]="goalForm.target_hours" name="ghours" min="1" max="40" required />
+        </label>
+        <button class="btn btn-primary" type="submit" [disabled]="saving">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Créer objectif
+        </button>
+      </form>
+    </div>
+
+    <!-- GOALS LIST -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Objectifs en cours</div>
+          <div class="card-sub">{{ goals.length }} objectif(s)</div>
+        </div>
+      </div>
+      <div class="goals-grid" *ngIf="goals.length > 0; else noGoals">
+        <div class="goal-card" *ngFor="let goal of goals" [class.completed]="goal.is_completed">
+          <div class="gc-head">
+            <div class="gc-subject" [style.color]="goal.subjects.color || 'var(--text)'">{{ goal.subjects.name }}</div>
+            <span class="gc-badge" [ngClass]="goal.is_completed ? 'gc-done' : 'gc-in'">
+              {{ goal.is_completed ? 'Atteint' : 'En cours' }}
+            </span>
+          </div>
+          <div class="gc-stats">
+            <span class="gc-hours">{{ goal.achieved_hours }}h / {{ goal.target_hours }}h</span>
+            <span class="gc-pct">{{ goalPct(goal) }}%</span>
+          </div>
+          <div class="goal-track">
+            <div class="goal-fill"
+              [style.width.%]="goalPct(goal)"
+              [style.background]="goal.is_completed ? 'var(--green)' : (goal.subjects.color || 'var(--accent)')">
+            </div>
+          </div>
+          <div class="gc-week">Semaine du {{ goal.week_start | date:'dd/MM/yyyy' }}</div>
+        </div>
+      </div>
+      <ng-template #noGoals>
+        <div class="empty">Aucun objectif. Créez votre premier objectif hebdomadaire.</div>
+      </ng-template>
+    </div>
+  </div>
+</div>

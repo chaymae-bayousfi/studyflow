@@ -1,15 +1,22 @@
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
-  background: #0b0e17;
-  color: #eceef5;
+  background: var(--dark-1);
+  color: var(--text);
+  overflow: hidden;
 }
 
 .workspace {
   min-width: 0;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .content {
-  padding: 22px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 28px;
 }

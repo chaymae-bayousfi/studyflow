@@ -124,6 +124,10 @@ export class StudyflowService {
     return this.http.post(`${this.apiUrl}/groups/${groupId}/invite`, { email }, { params: this.userParams(userId) }).pipe(timeout(8000));
   }
 
+  joinByCode(userId: string, code: string): Observable<unknown> {
+    return this.http.post(`${this.apiUrl}/groups/join/code`, {}, { params: new HttpParams().set('userId', userId).set('code', code) }).pipe(timeout(8000));
+  }
+
   members(groupId: string): Observable<GroupMember[]> {
     return this.http.get<GroupMember[]>(`${this.apiUrl}/groups/${groupId}/members`).pipe(timeout(8000));
   }

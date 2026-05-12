@@ -1,37 +1,116 @@
 .topbar {
-  height: 68px;
+  height: 60px;
+  flex-shrink: 0;
+  background: var(--dark-1);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  background: #10141f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0 28px;
+  gap: 16px;
 }
 
-.eyebrow {
-  color: #4f8ef7;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.topbar-left h1 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-h2 {
-  margin: 2px 0 0;
-  font-size: 1.05rem;
+.topbar-sub {
+  font-size: 0.62rem;
+  color: var(--text-3);
+  font-family: var(--mono);
+  margin-top: 2px;
 }
 
-.status {
+.topbar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--dark-3);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.14s;
+  text-decoration: none;
+}
+
+.icon-btn:hover { border-color: var(--border-md); }
+
+.icon-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--text-2);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.notif-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 2px solid var(--dark-1);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.btn svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover { background: #5a97f8; }
+
+.user-select {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #7e8799;
-  font-size: 0.82rem;
 }
 
-.status span {
-  width: 8px;
-  height: 8px;
-  border-radius: 99px;
-  background: #1fc87a;
+.user-select select {
+  background: var(--dark-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
 }

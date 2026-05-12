@@ -1,0 +1,84 @@
+<div class="page">
+  <div>
+    <span class="eyebrow">Collaboration</span>
+    <h1>Messages</h1>
+    <p class="sub">Chattez avec vos groupes d'étude en temps réel.</p>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+
+  <div class="messages-layout">
+    <!-- GROUPS SIDEBAR -->
+    <div class="groups-sidebar">
+      <div class="sidebar-head">
+        <div class="sidebar-title">Groupes</div>
+        <div class="sidebar-sub">{{ groups.length }} groupe(s)</div>
+      </div>
+      <div class="group-items">
+        <div
+          class="group-item"
+          *ngFor="let g of groups"
+          [class.selected]="selectedGroup?.id === g.id"
+          (click)="selectGroup(g)"
+        >
+          <div class="group-av">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div class="group-name">{{ g.name }}</div>
+            <div class="group-meta">{{ g.is_public ? 'Public' : 'Privé' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT AREA -->
+    <div class="chat-area" *ngIf="selectedGroup">
+      <div class="chat-head">
+        <div>
+          <div class="chat-name">{{ selectedGroup.name }}</div>
+          <div class="chat-sub">{{ messages.length }} message(s)</div>
+        </div>
+        <div class="invite-section">
+          <div class="invite-label">Inviter par email</div>
+          <div class="invite-row">
+            <input type="email" [(ngModel)]="inviteEmail" placeholder="email@etudiant.ma" />
+            <button class="btn btn-primary" style="padding:6px 12px;font-size:0.72rem" (click)="inviteUser()">Inviter</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-messages" #chatScroll>
+        <div *ngIf="messages.length === 0" class="empty">Aucun message. Soyez le premier à écrire !</div>
+        <div class="msg" *ngFor="let m of messages" [class.mine]="m.users.id === userId">
+          <div class="msg-av" [class.me]="m.users.id === userId">
+            {{ m.users.first_name[0] }}{{ m.users.last_name[0] }}
+          </div>
+          <div class="msg-bubble">
+            <div class="msg-info">
+              <span class="msg-sender">{{ m.users.first_name }} {{ m.users.last_name }}</span>
+              <span class="msg-time">{{ timeAgo(m.created_at) }}</span>
+            </div>
+            <div class="msg-text">{{ m.content }}</div>
+          </div>
+        </div>
+      </div>
+
+      <form class="chat-input" (ngSubmit)="sendMessage()">
+        <input [(ngModel)]="messageText" name="msg" placeholder="Votre message..." />
+        <button class="btn btn-primary" type="submit" [disabled]="!messageText.trim()">
+          <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Envoyer
+        </button>
+      </form>
+    </div>
+
+    <div class="no-group" *ngIf="!selectedGroup">
+      <div>
+        <div style="font-size:1.5rem;margin-bottom:8px">💬</div>
+        Sélectionnez un groupe pour commencer à chatter
+      </div>
+    </div>
+  </div>
+</div>

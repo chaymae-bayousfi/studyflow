@@ -1,0 +1,194 @@
+<div class="page">
+  <div class="page-head">
+    <span class="eyebrow">Planification</span>
+    <h1>Mon planning</h1>
+    <p class="sub">Gérez vos matières, disponibilités et sessions d'étude intelligentes.</p>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+
+  <div class="grid-2">
+    <!-- SUBJECTS -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Matières & projets</div>
+          <div class="card-sub">{{ subjects.length }} matière(s) créée(s)</div>
+        </div>
+      </div>
+      <form class="form" (ngSubmit)="createSubject()">
+        <label>
+          Nom de la matière
+          <input [(ngModel)]="subjectForm.name" name="sname" placeholder="ex: Mathématiques" required />
+        </label>
+        <label>
+          Description
+          <input [(ngModel)]="subjectForm.description" name="sdesc" placeholder="Optionnel" />
+        </label>
+        <div class="form-row">
+          <label>
+            Couleur
+            <input type="color" [(ngModel)]="subjectForm.color" name="scolor" />
+          </label>
+          <label>
+            Priorité
+            <select [(ngModel)]="subjectForm.priority" name="spriority">
+              <option value="low">Faible</option>
+              <option value="medium">Moyenne</option>
+              <option value="high">Haute</option>
+              <option value="critical">Critique</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="saving">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter matière
+        </button>
+      </form>
+      <div class="chips" *ngIf="subjects.length > 0">
+        <span
+          class="chip-tag"
+          *ngFor="let s of subjects"
+          [style.border-color]="s.color"
+          [style.color]="s.color"
+          (click)="deleteSubject(s.id)"
+          title="Cliquer pour supprimer"
+        >
+          <span class="chip-dot" [style.background]="s.color"></span>
+          {{ s.name }} · {{ s.priority }}
+        </span>
+      </div>
+    </div>
+
+    <!-- AVAILABILITIES -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Disponibilités</div>
+          <div class="card-sub">{{ availabilities.length }} créneau(x) défini(s)</div>
+        </div>
+      </div>
+      <form class="form" (ngSubmit)="createAvailability()">
+        <label>
+          Jour
+          <select [(ngModel)]="availForm.day" name="avday">
+            <option value="monday">Lundi</option>
+            <option value="tuesday">Mardi</option>
+            <option value="wednesday">Mercredi</option>
+            <option value="thursday">Jeudi</option>
+            <option value="friday">Vendredi</option>
+            <option value="saturday">Samedi</option>
+            <option value="sunday">Dimanche</option>
+          </select>
+        </label>
+        <div class="form-row">
+          <label>
+            Début
+            <input type="time" [(ngModel)]="availForm.start_time" name="avstart" />
+          </label>
+          <label>
+            Fin
+            <input type="time" [(ngModel)]="availForm.end_time" name="avend" />
+          </label>
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="saving">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter disponibilité
+        </button>
+      </form>
+      <div class="list" *ngIf="availabilities.length > 0">
+        <div class="list-item" *ngFor="let a of availabilities">
+          <div class="list-item-info">
+            <div class="list-item-title">{{ dayLabel(a.day) }}</div>
+            <div class="list-item-meta">{{ a.start_time | date:'HH:mm' }} – {{ a.end_time | date:'HH:mm' }}</div>
+          </div>
+          <button class="btn btn-danger" (click)="deleteAvailability(a.id)">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSIONS (wide) -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Sessions d'étude</div>
+        <div class="card-sub">{{ sessions.length }} session(s) planifiée(s)</div>
+      </div>
+      <button class="btn btn-ghost" (click)="generatePlanning()" [disabled]="saving">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Générer planning intelligent
+      </button>
+    </div>
+
+    <form class="form" (ngSubmit)="createSession()">
+      <div class="form-row">
+        <label>
+          Titre de la session
+          <input [(ngModel)]="sessionForm.title" name="stitle" placeholder="ex: Révision algèbre" required />
+        </label>
+        <label>
+          Matière
+          <select [(ngModel)]="sessionForm.subject_id" name="ssubject" required>
+            <option value="">Choisir une matière</option>
+            <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          Début
+          <input type="datetime-local" [(ngModel)]="sessionForm.planned_start" name="sstart" required />
+        </label>
+        <label>
+          Fin
+          <input type="datetime-local" [(ngModel)]="sessionForm.planned_end" name="send" required />
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          Priorité
+          <select [(ngModel)]="sessionForm.priority" name="spri">
+            <option value="low">Faible</option>
+            <option value="medium">Moyenne</option>
+            <option value="high">Haute</option>
+            <option value="critical">Critique</option>
+          </select>
+        </label>
+        <label>
+          Type
+          <select [(ngModel)]="sessionForm.is_online" name="sonline">
+            <option [ngValue]="false">Présentiel</option>
+            <option [ngValue]="true">En ligne</option>
+          </select>
+        </label>
+      </div>
+      <button class="btn btn-primary" type="submit" [disabled]="saving" style="justify-self:start">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Créer session
+      </button>
+    </form>
+
+    <div class="list" *ngIf="sessions.length > 0; else noSess">
+      <div class="list-item" *ngFor="let s of sessions">
+        <div class="session-bar" [style.background]="s.subjects?.color || 'var(--accent)'"></div>
+        <div class="list-item-info">
+          <div class="list-item-title">{{ s.title }}</div>
+          <div class="list-item-meta">{{ formatDt(s.planned_start) }} · {{ s.priority }} · {{ s.is_online ? 'En ligne' : 'Présentiel' }}</div>
+        </div>
+        <span class="chip-sm" [ngClass]="statusChip(s.status)">{{ statusLabel(s.status) }}</span>
+        <button class="btn btn-primary" style="padding:5px 10px;font-size:0.72rem" (click)="completeSession(s)" [disabled]="s.status === 'completed'">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Réalisée
+        </button>
+        <button class="btn btn-danger" style="padding:5px 10px;font-size:0.72rem" (click)="deleteSession(s.id)">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+    </div>
+    <ng-template #noSess>
+      <div class="empty">Aucune session. Créez votre première session ou générez un planning intelligent.</div>
+    </ng-template>
+  </div>
+</div>

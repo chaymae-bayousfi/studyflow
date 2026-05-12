@@ -1,0 +1,101 @@
+<div class="page">
+  <div>
+    <span class="eyebrow">Collaboration</span>
+    <h1>Groupes d'étude</h1>
+    <p class="sub">Créez ou rejoignez des groupes pour étudier ensemble.</p>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+
+  <div class="grid-2">
+    <!-- FORMS -->
+    <div style="display:grid;gap:16px">
+      <!-- CREATE GROUP -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Créer un groupe</div>
+        </div>
+        <form class="form" (ngSubmit)="createGroup()">
+          <label>
+            Nom du groupe
+            <input [(ngModel)]="groupForm.name" name="gname" placeholder="ex: Groupe Math S2" required />
+          </label>
+          <label>
+            Description
+            <input [(ngModel)]="groupForm.description" name="gdesc" placeholder="Optionnel" />
+          </label>
+          <label>
+            Matière liée
+            <select [(ngModel)]="groupForm.subject_id" name="gsubject">
+              <option value="">Sans matière</option>
+              <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+            </select>
+          </label>
+          <div class="checkbox-row">
+            <input type="checkbox" [(ngModel)]="groupForm.is_public" name="gpublic" id="gpublic" />
+            <label for="gpublic" style="display:inline;font-size:0.845rem;color:var(--text-2);text-transform:none;letter-spacing:0;font-weight:500">Groupe public</label>
+          </div>
+          <button class="btn btn-primary" type="submit" [disabled]="saving">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Créer groupe
+          </button>
+        </form>
+      </div>
+
+      <!-- JOIN BY CODE -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Rejoindre par code</div>
+        </div>
+        <form class="form" (ngSubmit)="joinByCode()">
+          <label>
+            Code d'invitation
+            <input [(ngModel)]="joinCode" name="jcode" placeholder="ex: AB3X9K12" />
+          </label>
+          <button class="btn btn-ghost" type="submit" [disabled]="saving">
+            Rejoindre
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- GROUPS LIST -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Tous les groupes</div>
+          <div class="card-sub">{{ groups.length }} groupe(s)</div>
+        </div>
+      </div>
+      <div class="groups-grid" *ngIf="groups.length > 0; else noGroups">
+        <div class="group-card" *ngFor="let group of groups">
+          <div class="group-header">
+            <div class="group-av">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="group-info">
+              <div class="group-name">{{ group.name }}</div>
+              <div class="group-desc" *ngIf="group.description">{{ group.description }}</div>
+              <div class="group-meta" *ngIf="group.subjects">Matière: {{ group.subjects.name }}</div>
+            </div>
+          </div>
+          <div *ngIf="group.invitation_code" class="group-code">
+            Code: {{ group.invitation_code }}
+          </div>
+          <div class="group-footer">
+            <span class="badge" [ngClass]="group.is_public ? 'badge-pub' : 'badge-priv'">
+              {{ group.is_public ? 'Public' : 'Privé' }}
+            </span>
+            <button class="btn btn-primary" style="padding:5px 12px;font-size:0.72rem" (click)="joinGroup(group.id)" *ngIf="group.is_public">
+              Rejoindre
+            </button>
+          </div>
+        </div>
+      </div>
+      <ng-template #noGroups>
+        <div class="empty">Aucun groupe disponible. Créez le premier !</div>
+      </ng-template>
+    </div>
+  </div>
+</div>

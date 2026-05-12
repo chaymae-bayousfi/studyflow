@@ -1,82 +1,34 @@
 import { Routes } from '@angular/router';
 
 import { MainLayoutComponent } from './layouts/main-layout/main-layout';
-
-import { StudySpaceComponent } from './pages/study-space/study-space';
-
+import { DashboardPageComponent } from './pages/dashboard-page/dashboard-page';
+import { PlanningPageComponent } from './pages/planning-page/planning-page';
+import { ProductivityPageComponent } from './pages/productivity-page/productivity-page';
+import { GoalsPageComponent } from './pages/goals-page/goals-page';
+import { GroupsPageComponent } from './pages/groups-page/groups-page';
+import { MessagesPageComponent } from './pages/messages-page/messages-page';
+import { NotificationsPageComponent } from './pages/notifications-page/notifications-page';
+import { ProfilePageComponent } from './pages/profile-page/profile-page';
+import { SettingsPageComponent } from './pages/settings-page/settings-page';
 import { UsersComponent } from './pages/users/users';
-
 import { UserDetailsComponent } from './pages/user-details/user-details';
 
 export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-
     children: [
-      {
-        path: '',
-        component: StudySpaceComponent,
-        data: { section: 'dashboard' },
-      },
-
-      {
-        path: 'planning',
-        component: StudySpaceComponent,
-        data: { section: 'planning' },
-      },
-
-      {
-        path: 'productivity',
-        component: StudySpaceComponent,
-        data: { section: 'productivity' },
-      },
-
-      {
-        path: 'goals',
-        component: StudySpaceComponent,
-        data: { section: 'goals' },
-      },
-
-      {
-        path: 'groups',
-        component: StudySpaceComponent,
-        data: { section: 'groups' },
-      },
-
-      {
-        path: 'messages',
-        component: StudySpaceComponent,
-        data: { section: 'messages' },
-      },
-
-      {
-        path: 'notifications',
-        component: StudySpaceComponent,
-        data: { section: 'notifications' },
-      },
-
-      {
-        path: 'users',
-        component: UsersComponent,
-      },
-
-      {
-        path: 'users/:id',
-        component: UserDetailsComponent,
-      },
-
-      {
-        path: 'profile',
-        component: StudySpaceComponent,
-        data: { section: 'profile' },
-      },
-
-      {
-        path: 'settings',
-        component: StudySpaceComponent,
-        data: { section: 'settings' },
-      },
+      { path: '', component: DashboardPageComponent },
+      { path: 'planning', component: PlanningPageComponent },
+      { path: 'productivity', component: ProductivityPageComponent },
+      { path: 'goals', component: GoalsPageComponent },
+      { path: 'groups', component: GroupsPageComponent },
+      { path: 'messages', component: MessagesPageComponent },
+      { path: 'notifications', component: NotificationsPageComponent },
+      { path: 'profile', component: ProfilePageComponent },
+      { path: 'settings', component: SettingsPageComponent },
+      { path: 'users', component: UsersComponent },
+      { path: 'users/:id', component: UserDetailsComponent },
     ],
   },
 ];

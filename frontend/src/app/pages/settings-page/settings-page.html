@@ -1,0 +1,137 @@
+<div class="page">
+  <div>
+    <span class="eyebrow">Configuration</span>
+    <h1>Paramètres</h1>
+    <p class="sub">Personnalisez vos rappels, notifications et préférences de l'application.</p>
+  </div>
+
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+  <div *ngIf="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
+
+  <div class="settings-grid">
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Notification de test</div>
+          <div class="card-sub">Créez une notification manuelle pour tester le système.</div>
+        </div>
+      </div>
+      <form class="form" (ngSubmit)="sendTestNotification()">
+        <label>
+          Titre
+          <input name="notifTitle" [(ngModel)]="notifForm.title" required />
+        </label>
+        <label>
+          Message
+          <textarea name="notifBody" [(ngModel)]="notifForm.body" required></textarea>
+        </label>
+        <div>
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            {{ saving ? 'Envoi...' : 'Envoyer notification test' }}
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Préférences de notifications</div>
+          <div class="card-sub">Choisissez les alertes que vous souhaitez recevoir.</div>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Rappels de sessions</div>
+          <div class="toggle-desc">Recevez une alerte 30 min avant chaque session.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="prefs.sessionReminders" />
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Objectifs atteints</div>
+          <div class="toggle-desc">Célébrez vos succès avec une notification.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="prefs.goalAlerts" />
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Messages de groupe</div>
+          <div class="toggle-desc">Soyez notifié des nouveaux messages dans vos groupes.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="prefs.groupMessages" />
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Rapport hebdomadaire</div>
+          <div class="toggle-desc">Résumé de votre activité chaque lundi matin.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="prefs.weeklyReport" />
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Fuseau horaire</div>
+          <div class="card-sub">Utilisé pour planifier vos sessions correctement.</div>
+        </div>
+      </div>
+      <form class="form" (ngSubmit)="saveTimezone()">
+        <label>
+          Fuseau horaire
+          <select name="timezone" [(ngModel)]="timezone">
+            <option *ngFor="let tz of timezones" [value]="tz">{{ tz }}</option>
+          </select>
+        </label>
+        <div>
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            Enregistrer le fuseau
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <article class="card" *ngIf="currentUser">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Informations du compte</div>
+          <div class="card-sub">Détails de votre compte StudyFlow.</div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">Membre depuis</span>
+        <span class="info-val">{{ memberSince }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Rôle</span>
+        <span class="info-val">{{ currentUser.role }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Statut</span>
+        <span class="info-val">{{ currentUser.status }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email vérifié</span>
+        <span class="info-val">{{ currentUser.email_verified ? 'Oui' : 'Non' }}</span>
+      </div>
+    </article>
+  </div>
+</div>
