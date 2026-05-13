@@ -10,7 +10,7 @@ datasource db {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model availabilities {
-  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String      @id @default(uuid()) @db.Uuid
   user_id    String      @db.Uuid
   day        day_of_week
   start_time DateTime    @db.Time(6)
@@ -24,7 +24,7 @@ model availabilities {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model group_members {
-  id                                    String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                                    String            @id @default(uuid()) @db.Uuid
   group_id                              String            @db.Uuid
   user_id                               String            @db.Uuid
   role                                  group_member_role @default(member)
@@ -42,7 +42,7 @@ model group_members {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model group_messages {
-  id                   String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                   String           @id @default(uuid()) @db.Uuid
   group_id             String           @db.Uuid
   sender_id            String           @db.Uuid
   content              String
@@ -61,7 +61,7 @@ model group_messages {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model notifications {
-  id            String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id            String            @id @default(uuid()) @db.Uuid
   user_id       String            @db.Uuid
   type          notification_type
   title         String            @db.VarChar(255)
@@ -80,7 +80,7 @@ model notifications {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model refresh_tokens {
-  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
   user_id    String   @db.Uuid
   token_hash String   @unique
   expires_at DateTime @db.Timestamptz(6)
@@ -96,7 +96,7 @@ model refresh_tokens {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model session_comments {
-  id             String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String         @id @default(uuid()) @db.Uuid
   session_id     String         @db.Uuid
   author_id      String         @db.Uuid
   content        String
@@ -113,7 +113,7 @@ model session_comments {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model session_participants {
-  id                  String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                  String         @id @default(uuid()) @db.Uuid
   session_id          String         @db.Uuid
   user_id             String         @db.Uuid
   joined_at           DateTime?      @db.Timestamptz(6)
@@ -131,7 +131,7 @@ model session_participants {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model study_groups {
-  id              String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id              String           @id @default(uuid()) @db.Uuid
   created_by      String           @db.Uuid
   name            String           @db.VarChar(150)
   description     String?
@@ -148,7 +148,8 @@ model study_groups {
   group_messages  group_messages[]
   users           users            @relation(fields: [created_by], references: [id], onUpdate: NoAction)
   subjects        subjects?        @relation(fields: [subject_id], references: [id], onUpdate: NoAction)
-
+  study_sessions study_sessions[]
+  
   @@index([created_by], map: "idx_groups_created_by")
   @@index([invitation_code], map: "idx_groups_invite_code")
   @@index([is_public], map: "idx_groups_is_public")
@@ -157,7 +158,7 @@ model study_groups {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model study_sessions {
-  id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                   String                 @id @default(uuid()) @db.Uuid
   user_id              String                 @db.Uuid
   subject_id           String?                @db.Uuid
   weekly_schedule_id   String?                @db.Uuid
@@ -173,8 +174,7 @@ model study_sessions {
   planned_end          DateTime               @db.Timestamptz(6)
   actual_start         DateTime?              @db.Timestamptz(6)
   actual_end           DateTime?              @db.Timestamptz(6)
-  planned_duration_min Int?                   @default(dbgenerated("(EXTRACT(epoch FROM (planned_end - planned_start)) / (60)::numeric)"))
-  actual_duration_min  Int?                   @default(dbgenerated("\nCASE\n    WHEN ((actual_start IS NOT NULL) AND (actual_end IS NOT NULL)) THEN (EXTRACT(epoch FROM (actual_end - actual_start)) / (60)::numeric)\n    ELSE NULL::numeric\nEND"))
+  planned_duration_min Int?                  
   notes                String?
   productivity_rating  Int?                   @db.SmallInt
   created_at           DateTime               @default(now()) @db.Timestamptz(6)
@@ -185,7 +185,9 @@ model study_sessions {
   subjects             subjects?              @relation(fields: [subject_id], references: [id], onUpdate: NoAction)
   users                users                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   weekly_schedules     weekly_schedules?      @relation(fields: [weekly_schedule_id], references: [id], onUpdate: NoAction)
+  group_id String? @db.Uuid
 
+  study_groups study_groups? @relation(fields: [group_id], references: [id])
   @@index([user_id, planned_start, planned_end], map: "idx_sessions_overlap")
   @@index([planned_start], map: "idx_sessions_planned_start")
   @@index([weekly_schedule_id], map: "idx_sessions_schedule_id")
@@ -196,7 +198,7 @@ model study_sessions {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model subject_goals {
-  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String   @id @default(uuid()) @db.Uuid
   user_id        String   @db.Uuid
   subject_id     String   @db.Uuid
   week_start     DateTime @db.Date
@@ -215,7 +217,7 @@ model subject_goals {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model subjects {
-  id             String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String           @id @default(uuid()) @db.Uuid
   user_id        String           @db.Uuid
   name           String           @db.VarChar(150)
   description    String?
@@ -237,7 +239,7 @@ model subjects {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model users {
-  id                                            String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                                            String                 @id @default(uuid()) @db.Uuid
   email                                         String                 @unique @db.VarChar(255)
   password_hash                                 String
   first_name                                    String                 @db.VarChar(100)
@@ -277,7 +279,7 @@ model users {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model weekly_schedules {
-  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                  String           @id @default(uuid()) @db.Uuid
   user_id             String           @db.Uuid
   week_start          DateTime         @db.Date
   is_auto_generated   Boolean          @default(false)

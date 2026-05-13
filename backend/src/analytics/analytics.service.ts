@@ -34,119 +34,111 @@ export class AnalyticsService {
         },
       });
 
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday as start
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const startOfLastWeek = new Date(startOfWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+
     let totalMinutes = 0;
-
+    let weeklyMinutes = 0;
     let productivitySum = 0;
-
     let productivityCount = 0;
 
+    let thisWeekTotal = 0;
+    let thisWeekCompleted = 0;
+    let lastWeekTotal = 0;
+    let lastWeekCompleted = 0;
+
     sessions.forEach((session) => {
-      const start =
-        new Date(session.planned_start);
-
-      const end =
-        new Date(session.planned_end);
-
-      const minutes =
-        (end.getTime() -
-          start.getTime()) /
-        1000 /
-        60;
+      const start = new Date(session.planned_start);
+      const end = new Date(session.planned_end);
+      const minutes = (end.getTime() - start.getTime()) / 1000 / 60;
 
       totalMinutes += minutes;
 
-      if (session.productivity_rating) {
-        productivitySum +=
-          session.productivity_rating;
+      if (start >= startOfWeek) {
+        weeklyMinutes += minutes;
+      }
 
+      if (session.productivity_rating) {
+        productivitySum += session.productivity_rating;
         productivityCount++;
       }
     });
 
+    const allSessions = await this.prisma.study_sessions.findMany({
+      where: { user_id: userId },
+    });
+
+    allSessions.forEach((s) => {
+      const start = new Date(s.planned_start);
+      if (start >= startOfWeek) {
+        thisWeekTotal++;
+        if (s.status === 'completed') thisWeekCompleted++;
+      } else if (start >= startOfLastWeek && start < startOfWeek) {
+        lastWeekTotal++;
+        if (s.status === 'completed') lastWeekCompleted++;
+      }
+    });
+
+    const thisWeekRate = thisWeekTotal ? (thisWeekCompleted / thisWeekTotal) * 100 : 0;
+    const lastWeekRate = lastWeekTotal ? (lastWeekCompleted / lastWeekTotal) * 100 : 0;
+    const completionRateDelta = thisWeekRate - lastWeekRate;
+
     return {
       totalSessions,
-
       completedSessions,
-
-      totalStudyHours:
-        Number(
-          (totalMinutes / 60).toFixed(2),
-        ),
-
-      averageProductivity:
-        productivityCount > 0
-          ? Number(
-              (
-                productivitySum /
-                productivityCount
-              ).toFixed(2),
-            )
-          : 0,
+      totalStudyHours: Number((totalMinutes / 60).toFixed(2)),
+      weeklyStudyHours: Number((weeklyMinutes / 60).toFixed(2)),
+      completionRateDelta: Number(completionRateDelta.toFixed(1)),
+      averageProductivity: productivityCount > 0 ? Number((productivitySum / productivityCount).toFixed(2)) : 0,
     };
   }
 
   async weeklyStats(userId: string) {
-    const sessions =
-        await this.prisma.study_sessions.findMany({
-        where: {
-            user_id: userId,
-        },
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+    startOfWeek.setHours(0, 0, 0, 0);
 
-        orderBy: {
-            planned_start: 'asc',
+    const sessions = await this.prisma.study_sessions.findMany({
+      where: {
+        user_id: userId,
+        planned_start: {
+          gte: startOfWeek,
         },
-        });
+      },
+      orderBy: {
+        planned_start: 'asc',
+      },
+    });
 
     const daysMap = {
-        0: 'Sun',
-        1: 'Mon',
-        2: 'Tue',
-        3: 'Wed',
-        4: 'Thu',
-        5: 'Fri',
-        6: 'Sat',
+      0: 'Sun', 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat',
     };
 
     const stats: any = {
-        Sun: 0,
-        Mon: 0,
-        Tue: 0,
-        Wed: 0,
-        Thu: 0,
-        Fri: 0,
-        Sat: 0,
+      Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0,
     };
 
     sessions.forEach((session) => {
-        const start =
-        new Date(session.planned_start);
-
-        const end =
-        new Date(session.planned_end);
-
-        const hours =
-        (end.getTime() -
-            start.getTime()) /
-        1000 /
-        60 /
-        60;
-
-        const day =
-        daysMap[start.getDay()];
-
-        stats[day] += hours;
+      const start = new Date(session.planned_start);
+      const end = new Date(session.planned_end);
+      const hours = (end.getTime() - start.getTime()) / 1000 / 60 / 60;
+      const day = daysMap[start.getDay() as keyof typeof daysMap];
+      stats[day] += hours;
     });
 
     return {
-        days: Object.keys(stats).map((day) => ({
+      days: Object.keys(stats).map((day) => ({
         day,
-
-        hours: Number(
-            stats[day].toFixed(2),
-        ),
-        })),
+        hours: Number(stats[day].toFixed(2)),
+      })),
     };
-    }
+  }
 
     async subjectStats(userId: string) {
     const sessions =
