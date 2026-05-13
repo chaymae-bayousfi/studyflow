@@ -54,6 +54,8 @@ export class StudySpaceComponent implements OnInit {
     totalSessions: 0,
     completedSessions: 0,
     totalStudyHours: 0,
+    weeklyStudyHours: 0,
+    completionRateDelta: 0,
     averageProductivity: 0,
   };
 

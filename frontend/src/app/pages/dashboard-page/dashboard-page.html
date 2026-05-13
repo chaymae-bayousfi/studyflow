@@ -1,19 +1,23 @@
 <div class="page" *ngIf="!loading; else loadingTpl">
 
-  <!-- PROGRESS BANNER -->
+  <!-- ════════════════════════════════════════════════════════
+       PROGRESS BANNER
+       ════════════════════════════════════════════════════════ -->
   <div class="progress-banner">
     <div class="pb-glow"></div>
-    <div>
+    <div class="pb-left">
       <div class="pb-title">Objectif hebdomadaire</div>
       <div class="pb-sub">
-        Tu as accompli <span>{{ analytics.totalStudyHours }}h</span> sur
-        {{ currentUser?.weekly_goal_hours }}h cette semaine
+        Tu as accompli
+        <span>{{ analytics.totalStudyHours }}h</span>
+        sur {{ currentUser?.weekly_goal_hours }}h cette semaine
       </div>
       <div class="streak-badge" *ngIf="currentUser && currentUser.streak_days > 0">
         <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         Série de {{ currentUser.streak_days }} jours consécutifs
       </div>
     </div>
+
     <div class="pb-progress">
       <div class="pb-prog-label">
         <span>Progression</span>
@@ -23,6 +27,7 @@
         <div class="pb-fill" [style.width.%]="weeklyProgressPct"></div>
       </div>
     </div>
+
     <div class="pb-stats">
       <div class="pb-stat">
         <div class="pb-stat-val" style="color:var(--accent)">{{ weeklyProgressPct }}%</div>
@@ -39,11 +44,16 @@
     </div>
   </div>
 
-  <!-- KPI ROW -->
+  <!-- ════════════════════════════════════════════════════════
+       KPI ROW
+       ════════════════════════════════════════════════════════ -->
   <div class="kpi-row">
+    <!-- Heures totales -->
     <div class="kpi-card">
       <div class="kpi-icon" style="background:var(--accent-dim)">
-        <svg viewBox="0 0 24 24" style="stroke:var(--accent)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <svg viewBox="0 0 24 24" style="stroke:var(--accent)">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
       </div>
       <div>
         <div class="kpi-val" style="color:var(--accent)">{{ analytics.totalStudyHours }}h</div>
@@ -51,84 +61,129 @@
         <div class="kpi-delta" style="color:var(--green)">+{{ weeklyHours }}h cette semaine</div>
       </div>
     </div>
+
+    <!-- Taux de complétion -->
     <div class="kpi-card">
       <div class="kpi-icon" style="background:var(--green-dim)">
-        <svg viewBox="0 0 24 24" style="stroke:var(--green)"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <svg viewBox="0 0 24 24" style="stroke:var(--green)">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
       </div>
       <div>
         <div class="kpi-val" style="color:var(--green)">{{ completionRate }}%</div>
         <div class="kpi-lab">COMPLÉTION</div>
-        <div class="kpi-delta" style="color:var(--text-3)">{{ completedCount }} / {{ sessions.length }} sessions</div>
+        <div class="kpi-delta" style="color:var(--text-3)">
+          {{ completedCount }} / {{ sessions.length }} sessions
+        </div>
       </div>
     </div>
+
+    <!-- Groupes actifs -->
     <div class="kpi-card">
       <div class="kpi-icon" style="background:var(--amber-dim)">
-        <svg viewBox="0 0 24 24" style="stroke:var(--amber)"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <svg viewBox="0 0 24 24" style="stroke:var(--amber)">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
       </div>
       <div>
         <div class="kpi-val" style="color:var(--amber)">{{ groups.length }}</div>
         <div class="kpi-lab">GROUPES ACTIFS</div>
-        <div class="kpi-delta" style="color:var(--text-3)">{{ groups.slice(0,2).map(g => g.name).join(', ') || 'Aucun' }}</div>
+        <div class="kpi-delta" style="color:var(--text-3)">
+          {{ groups.slice(0,2).map(g => g.name).join(', ') || 'Aucun groupe' }}
+        </div>
       </div>
     </div>
+
+    <!-- XP Points -->
     <div class="kpi-card">
-      <div class="kpi-icon" style="background:rgba(31,200,122,0.12)">
-        <svg viewBox="0 0 24 24" style="stroke:var(--green)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <div class="kpi-icon" style="background:rgba(139,108,247,0.12)">
+        <svg viewBox="0 0 24 24" style="stroke:#8b6cf7">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
       </div>
       <div>
-        <div class="kpi-val" style="color:var(--green)">{{ currentUser?.xp_points || 0 }}</div>
+        <div class="kpi-val" style="color:#8b6cf7">{{ currentUser?.xp_points ?? 0 }}</div>
         <div class="kpi-lab">POINTS XP</div>
-        <div class="kpi-delta" style="color:var(--text-3)">Niveau {{ currentUser?.level || 1 }}</div>
+        <div class="kpi-delta" style="color:var(--text-3)">Niveau {{ currentUser?.level ?? 1 }}</div>
       </div>
     </div>
   </div>
 
-  <!-- MAIN GRID -->
+  <!-- ════════════════════════════════════════════════════════
+       MAIN GRID  (sessions left  |  calendar + goals right)
+       ════════════════════════════════════════════════════════ -->
   <div class="main-grid">
-    <!-- SESSIONS CARD -->
+
+    <!-- ── LEFT: Today's sessions + weekly compare chart ── -->
     <div class="card">
       <div class="card-head">
         <div>
           <div class="card-title">Planning du jour</div>
-          <div class="card-sub">{{ todayLabel }} — {{ todaySessions }} sessions planifiées</div>
+          <div class="card-sub">
+            {{ todayLabel }} — {{ todaySessions }} session(s) planifiée(s)
+          </div>
         </div>
         <a [routerLink]="['/planning']" class="chip chip-blue">Voir tout</a>
       </div>
 
-      <div class="session-list" *ngIf="sessions.length > 0; else noSessions">
-        <div class="session-item" *ngFor="let s of sessions.slice(0,5)" [class.active]="s.status === 'in_progress'">
-          <div class="sess-time">{{ formatTime(s.planned_start) }} – {{ formatTime(s.planned_end) }}</div>
+      <!-- Session list -->
+      <div class="session-list" *ngIf="todaySessionList.length > 0; else noSessions">
+        <div
+          class="session-item"
+          *ngFor="let s of todaySessionList"
+          [class.active]="s.status === 'in_progress'"
+        >
+          <div class="sess-time">
+            {{ formatTime(s.planned_start) }} – {{ formatTime(s.planned_end) }}
+          </div>
           <div class="sess-bar" [style.background]="s.subjects?.color || 'var(--accent)'"></div>
           <div class="sess-info">
             <div class="sess-subject">{{ s.title }}</div>
-            <div class="sess-meta">{{ sessionDuration(s) }} · {{ s.is_online ? 'En ligne' : 'Présentiel' }}</div>
+            <div class="sess-meta">
+              {{ sessionDuration(s) }} ·
+              {{ s.subjects?.name || 'Matière' }} ·
+              {{ s.is_online ? 'En ligne' : 'Présentiel' }}
+            </div>
           </div>
-          <span class="chip" [ngClass]="statusChip(s.status)">{{ statusLabel(s.status) }}</span>
+          <span class="chip" [ngClass]="statusChip(s.status)">
+            {{ statusLabel(s.status) }}
+          </span>
         </div>
       </div>
       <ng-template #noSessions>
-        <div class="empty">Aucune session planifiée. Créez votre premier planning.</div>
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Aucune session pour aujourd'hui. <a [routerLink]="['/planning']">Créer une session →</a>
+        </div>
       </ng-template>
 
-      <!-- COMPARE CHART -->
+      <!-- Weekly compare bar chart -->
       <div class="compare-chart" *ngIf="weekly.length > 0">
         <div class="cc-col" *ngFor="let point of weekly">
           <div class="cc-pair">
-            <div class="cc-bar" [style.height.%]="barHeight(point.hours)" style="background:rgba(79,142,247,0.4)"></div>
-            <div class="cc-bar" [style.height.%]="barHeight(point.hours * 0.75)" style="background:rgba(31,200,122,0.45)"></div>
+            <div class="cc-bar planned" [style.height.%]="barHeight(point.hours)"></div>
+            <div class="cc-bar realized" [style.height.%]="barHeight(point.hours * 0.75)"></div>
           </div>
           <div class="cc-lbl">{{ point.day }}</div>
         </div>
       </div>
       <div class="compare-legend" *ngIf="weekly.length > 0">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Sessions prévues</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Sessions réalisées</div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--accent)"></div>Sessions prévues
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--green)"></div>Sessions réalisées
+        </div>
       </div>
     </div>
 
-    <!-- RIGHT COLUMN -->
+    <!-- ── RIGHT COLUMN: Mini calendar + Weekly goals ── -->
     <div class="side-col">
-      <!-- MINI CALENDAR -->
+
+      <!-- Mini calendar -->
       <div class="card">
         <div class="cal-head">
           <button class="cal-nav" (click)="prevMonth()">
@@ -151,85 +206,154 @@
         </div>
       </div>
 
-      <!-- WEEKLY GOALS -->
+      <!-- Weekly goals -->
       <div class="card">
         <div class="card-head">
-          <div class="card-title">Objectifs de la semaine</div>
+          <div>
+            <div class="card-title">Objectifs de la semaine</div>
+            <div class="card-sub">{{ goals.length }} objectif(s)</div>
+          </div>
+          <a [routerLink]="['/goals']" class="chip chip-blue">Gérer</a>
         </div>
         <div class="goal-list" *ngIf="goals.length > 0; else noGoals">
-          <div class="goal-item" *ngFor="let goal of goals.slice(0,4)">
+          <div class="goal-item" *ngFor="let goal of goals.slice(0, 4)">
             <div class="goal-row">
-              <span class="goal-name">{{ goal.subjects.name }}</span>
+              <span class="goal-name" [style.color]="goal.subjects.color || 'var(--text)'">
+                {{ goal.subjects.name }}
+              </span>
               <span class="goal-count">{{ goal.achieved_hours }}h / {{ goal.target_hours }}h</span>
             </div>
             <div class="goal-track">
-              <div class="goal-fill" [style.width.%]="goalPct(goal)" [style.background]="goal.subjects.color || 'var(--accent)'"></div>
+              <div
+                class="goal-fill"
+                [style.width.%]="goalPct(goal)"
+                [style.background]="goal.is_completed ? 'var(--green)' : (goal.subjects.color || 'var(--accent)')"
+              ></div>
             </div>
           </div>
         </div>
         <ng-template #noGoals>
-          <div class="empty">Aucun objectif. Créez vos objectifs hebdomadaires.</div>
+          <div class="empty-state small">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Aucun objectif défini. <a [routerLink]="['/goals']">Créer →</a>
+          </div>
         </ng-template>
       </div>
+
     </div>
   </div>
 
-  <!-- BOTTOM ROW -->
+  <!-- ════════════════════════════════════════════════════════
+       BOTTOM ROW  (groups left  |  notifications right)
+       ════════════════════════════════════════════════════════ -->
   <div class="bottom-row">
-    <!-- GROUPS -->
+
+    <!-- Groups -->
     <div class="card">
       <div class="card-head">
         <div>
           <div class="card-title">Groupes d'étude</div>
           <div class="card-sub">Collaboration active</div>
         </div>
-        <a [routerLink]="['/groups']" class="chip chip-blue">Gérer</a>
+        <a [routerLink]="['/groups']" class="btn-ghost-sm">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Créer
+        </a>
       </div>
-      <div class="group-list" *ngIf="groups.length > 0; else noGroups">
-        <div class="group-item" *ngFor="let group of groups.slice(0,4)">
-          <div class="group-av" [style.background]="'rgba(79,142,247,0.12)'">
-            <svg viewBox="0 0 24 24" style="stroke:var(--accent)"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+
+      <div class="group-list" *ngIf="myGroups.length > 0; else noGroups">
+        <div class="group-item" *ngFor="let group of myGroups; let i = index">
+          <div class="group-av" [style.background]="groupBg(i)">
+            <svg viewBox="0 0 24 24" [style.stroke]="groupColor(i)">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
           </div>
-          <div>
+          <div class="group-info">
             <div class="group-name">{{ group.name }}</div>
-            <div class="group-meta">{{ group.description || 'Groupe étude' }}</div>
+            <div class="group-meta">
+              {{ group.description || (group.is_public ? 'Groupe public' : 'Groupe privé') }}
+            </div>
           </div>
           <button class="join-btn joined">Membre</button>
         </div>
       </div>
       <ng-template #noGroups>
-        <div class="empty">Aucun groupe. Rejoignez ou créez un groupe d'étude.</div>
+        <div class="empty-state small">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Aucun groupe. <a [routerLink]="['/groups']">Rejoindre ou créer →</a>
+        </div>
       </ng-template>
     </div>
 
-    <!-- NOTIFICATIONS -->
+    <!-- Notifications -->
     <div class="card">
       <div class="card-head">
         <div>
           <div class="card-title">Notifications</div>
-          <div class="card-sub">{{ unreadCount }} non lues</div>
+          <div class="card-sub">{{ unreadCount }} non lue(s)</div>
         </div>
-        <span class="chip chip-blue" style="cursor:pointer" (click)="markAllRead()">Tout marquer lu</span>
+        <span
+          class="chip chip-blue"
+          style="cursor:pointer"
+          (click)="markAllRead()"
+          *ngIf="unreadCount > 0"
+        >Tout marquer lu</span>
       </div>
+
       <div class="notif-list" *ngIf="notifications.length > 0; else noNotifs">
-        <div class="notif-item" *ngFor="let n of notifications.slice(0,5)">
-          <div class="notif-dot-indicator" [class.read]="n.is_read"></div>
-          <div class="notif-icon" [style.background]="notifIconBg(n.type)">
-            <svg viewBox="0 0 24 24" [style.stroke]="notifIconColor(n.type)"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-item" *ngFor="let n of notifications.slice(0, 5)">
+          <div class="notif-dot-wrap">
+            <div class="notif-dot" [class.read]="n.is_read"></div>
           </div>
-          <div>
-            <div class="notif-text"><strong>{{ n.title }}</strong> — {{ n.body }}</div>
+          <div class="notif-icon" [style.background]="notifIconBg(n.type)">
+            <!-- reminder -->
+            <svg *ngIf="n.type === 'session_reminder'" viewBox="0 0 24 24" [style.stroke]="notifIconColor(n.type)">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <!-- invitation -->
+            <svg *ngIf="n.type === 'group_invitation'" viewBox="0 0 24 24" [style.stroke]="notifIconColor(n.type)">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            </svg>
+            <!-- goal achieved -->
+            <svg *ngIf="n.type === 'goal_achieved'" viewBox="0 0 24 24" [style.stroke]="notifIconColor(n.type)">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <!-- comment / default -->
+            <svg *ngIf="n.type !== 'session_reminder' && n.type !== 'group_invitation' && n.type !== 'goal_achieved'"
+                 viewBox="0 0 24 24" [style.stroke]="notifIconColor(n.type)">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div class="notif-content">
+            <div class="notif-text">
+              <strong>{{ n.title }}</strong> — {{ n.body }}
+            </div>
             <div class="notif-time">{{ timeAgo(n.created_at) }}</div>
           </div>
         </div>
       </div>
       <ng-template #noNotifs>
-        <div class="empty">Aucune notification.</div>
+        <div class="empty-state small">
+          <svg viewBox="0 0 24 24"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Aucune notification.
+        </div>
       </ng-template>
+
+      <a [routerLink]="['/notifications']" class="view-all-link" *ngIf="notifications.length > 5">
+        Voir toutes les notifications ({{ notifications.length }}) →
+      </a>
     </div>
+
   </div>
 </div>
 
+<!-- Loading state -->
 <ng-template #loadingTpl>
-  <div style="padding:40px; text-align:center; color:var(--text-3)">Chargement du tableau de bord...</div>
+  <div class="loading-screen">
+    <div class="loading-spinner"></div>
+    <span>Chargement du tableau de bord...</span>
+  </div>
 </ng-template>

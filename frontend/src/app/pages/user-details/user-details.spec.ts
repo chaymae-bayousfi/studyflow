@@ -1,17 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserDetails } from './user-details';
+import { ActivatedRoute, RouterLinkWithHref } from '@angular/router';
 
-describe('UserDetails', () => {
-  let component: UserDetails;
-  let fixture: ComponentFixture<UserDetails>;
+import { UserDetailsComponent } from './user-details';
+describe('UserDetailsComponent', () => {
+  let component: UserDetailsComponent;
+  let fixture: ComponentFixture<UserDetailsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UserDetails],
+      imports: [UserDetailsComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: () => '1',
+              },
+            },
+          },
+        },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UserDetails);
+
+    fixture = TestBed.createComponent(UserDetailsComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
@@ -20,3 +34,4 @@ describe('UserDetails', () => {
     expect(component).toBeTruthy();
   });
 });
+

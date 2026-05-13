@@ -80,6 +80,8 @@ export interface AnalyticsDashboard {
   totalSessions: number;
   completedSessions: number;
   totalStudyHours: number;
+  weeklyStudyHours: number;
+  completionRateDelta: number;
   averageProductivity: number;
 }
 

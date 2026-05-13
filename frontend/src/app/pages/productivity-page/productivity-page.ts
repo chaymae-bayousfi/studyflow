@@ -11,7 +11,14 @@ import { StudyflowService } from '../../services/studyflow';
   styleUrl: './productivity-page.css',
 })
 export class ProductivityPageComponent implements OnInit {
-  analytics: AnalyticsDashboard = { totalSessions: 0, completedSessions: 0, totalStudyHours: 0, averageProductivity: 0 };
+  analytics: AnalyticsDashboard = {
+    totalSessions: 0,
+    completedSessions: 0,
+    totalStudyHours: 0,
+    weeklyStudyHours: 0,
+    completionRateDelta: 0,
+    averageProductivity: 0,
+  };
   weekly: WeeklyPoint[] = [];
   subjectStats: SubjectPoint[] = [];
 
